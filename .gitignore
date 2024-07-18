@@ -1,1 +1,6 @@
-/basics/*.exe 
+# Other ignore rules
+*.log
+*.tmp
+
+# Ignore all .exe files in the entire project
+*.exe
