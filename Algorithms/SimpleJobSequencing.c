@@ -1,118 +1,103 @@
+// Job sequencing with deadline using greedy method
 #include <stdio.h>
+#include <stdlib.h>
+
+#define ID_LENGTH 6
 
 typedef struct Job{
-	char id[6];
+	char id[ID_LENGTH];
 	int deadline;
 	int profit;
 }Job;
 
-void SimpleJobSequencing(struct Job jobs[],int n,int timeslotsize);
+int min(int a, int b){
+	if (a > b)
+		return b;
+	else
+		return a;	
+}
 
-int min(int x,int y){
-	if (x > y)
-	{
-		return y;
-	}else{
-		return x;
+
+void JobSequencing(Job jobs[], int numberOfJobs){
+
+	printf("--------------------------------------\n");
+	// Step 1: Find the farthest or max deadline.
+	int i,j,k,m,maxdeadLine = 0;
+	for(i=0; i<numberOfJobs; i++){
+		if (jobs[i].deadline > maxdeadLine)
+		{
+			maxdeadLine = jobs[i].deadline;
+		}
 	}
+	
+	int timeSlots[maxdeadLine+2];
+
+	for(j=1; j <= maxdeadLine; j++){
+		timeSlots[j] = -1;
+	}
+
+	printf("Maximum deadline: %d\n", maxdeadLine);
+	// Step 2: Prepare / Initialize the Time slots
+
+	printf("--------------------------------------\n");
+	// Step 3: Job Sequencing Algorithm
+	for(int k=1; k <= maxdeadLine; k++){
+		int minval = min(jobs[k-1].deadline, maxdeadLine);
+		while(minval >= 1){
+			if(timeSlots[minval] == -1){
+				timeSlots[minval] = k-1;
+				break; 
+			}
+			minval--;
+		}
+	}
+
+	// Step 4: Print the Selected Jobs and total profit
+	printf("\nSelected Jobs:\n");
+	int maxProfit = 0;
+	for(int m=1; m <= maxdeadLine; m++){
+		printf("%s\t",jobs[timeSlots[m]].id);
+		maxProfit += jobs[timeSlots[m]].profit;
+	}
+
+	printf("Total Profit: %d\n", maxProfit);
+
 }
 
 int main(){
-
-	int i,j, maxtimeslot, slot_val;
-
-	Job jobs[6] = {
-		{"J1", 5, 200},
-		{"J2", 3, 180},
-		{"J3", 3, 190},
-		{"J4", 2, 300},
-		{"J5", 4, 120},
-		{"J6", 2, 100}
+	Job jobs[] = {
+		"P1", 4, 500,
+		"P2", 2, 100,
+		"P3", 1, 300,
+		"p4", 3, 301,
+		"p5", 1, 130
 	};
 
-	// Number of Jobs
-	int n = 6;
+	int numberOfJobs = 5;
 
-	// Sort the jobs in profile wise decending order
-	for(i = 0; i < n-1; i++){
-		int max = i;
-		maxtimeslot = i;
-
-		for (j = i+1; j < n; j++)
-		{
-			// This if block is for sorting
-			if (jobs[j].profit > jobs[max].profit){
-				max = j;
-			}
-
-			// This if block is for finding the maximum time slot.
-			if (jobs[maxtimeslot].deadline < jobs[j].deadline)
-			{
-				maxtimeslot = j;
+	// Sort the Jobs based on the profit in decending order.
+	for(int i=0; i<numberOfJobs; i++){
+		int job_with_max_profit = i;
+		for(int j = i + 1; j < numberOfJobs; j++){
+			if(jobs[job_with_max_profit].profit < jobs[j].profit){
+				job_with_max_profit = j;
 			}
 		}
 
-		if (max != i)
-		{
-			Job temp = jobs[i];
-			jobs[i] = jobs[max];
-			jobs[max] = temp;
-		}
-
-		if (maxtimeslot != i)
-		{
-			slot_val = maxtimeslot;
-			printf("%d \n", slot_val);
+		if(job_with_max_profit != i){
+			Job tmpJob = jobs[i];
+			jobs[i] = jobs[job_with_max_profit];
+			jobs[job_with_max_profit] = tmpJob;
 		}
 	}
 
-	printf("%10s %10s %10s","Job","Deadline","Profit\n");
-	for (i = 0; i < n; i++)
-	{
-		printf("%10s %10i %10i\n",jobs[i].id, jobs[i].deadline, jobs[i].profit);
+	printf("\n Number of Jobs: %d\n",numberOfJobs);
+	printf("Sorted jobs based on profit in decending order: \n");
+	for(int i=0; i<numberOfJobs; i++){
+		printf("Job %d: Id: %s, Profit: %d, Deadline: %d\n",i+1, jobs[i].id, jobs[i].profit, jobs[i].deadline);
 	}
 
-	SimpleJobSequencing(jobs, n, slot_val);
+	JobSequencing(jobs, numberOfJobs);
 
 	return 0;
-}
-
-void SimpleJobSequencing(Job jobs[],int n,int timeslotsize){
-	int i, j, k, max_profit;
-
-	//free timeslots
-	int timeslots[timeslotsize];
-
-	for (i = 1; i <= timeslotsize; i++)
-	{
-		timeslots[i] = -1;
-	}
-
-	printf("Max time slot (deadline): %i\n", timeslotsize);
-	
-	for(i=1; i<=n; i++){
-		k = min(jobs[i-1].deadline, timeslotsize);
-		while(k >= 1){
-			if (timeslots[k] == -1)
-			{
-				timeslots[k] = i-1;
-				break;
-			}
-			k--;
-		}
-	}
-
-	for(int i=0; i<timeslotsize; i++){
-		printf(" %s ",jobs[timeslots[i]].id);
-		printf(" -----> ");
-	}	
-
-	printf("\n");
-	max_profit = 0;
-	for(int i=0; i<timeslotsize; i++){
-		max_profit += jobs[timeslots[i]].profit;
-	}
-
-	printf("\nMax Profit is: %d\n", max_profit);
-
 }
